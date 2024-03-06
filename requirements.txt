@@ -1,0 +1,22 @@
+streamlit==1.31.1
+streamlit-chat==0.1.1
+streamlit-authenticator==0.2.3
+streamlit-pydantic==0.6.0
+langchain==0.1.9
+langchain-community==0.0.24
+pypdf==3.17.1
+tiktoken==0.5.2
+sentence-transformers==2.2.2
+# pydantic==2.5.1
+# pydantic-core==2.14.3
+requests==2.31.0
+python-certifi-win32==1.6.1
+pypdfium2==4.24.0
+redis==5.0.1
+snowflake-id==0.0.5
+caikit-nlp-client==0.0.8
+amazon-transcribe==0.6.2
+streamlit-mic-recorder==0.0.8
+
+
+
