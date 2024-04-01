@@ -1,8 +1,5 @@
 import streamlit as st
-import os
 from langchain.chains import ConversationalRetrievalChain, RetrievalQA
-from langchain.prompts import PromptTemplate
-from langchain.prompts.chat import ChatPromptTemplate
 
 
 class Chatbot:

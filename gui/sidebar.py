@@ -1,12 +1,16 @@
+import asyncio
+
 import streamlit as st
 import streamlit_authenticator as stauth
 import yaml
+from streamlit_mic_recorder import mic_recorder
 from yaml.loader import SafeLoader
 import os
 import tempfile
 
 from chatbot import Chatbot
 from embedding import DocEmbedding
+from utils.aws_transcribe import basic_transcribe
 
 
 class Sidebar:
@@ -115,19 +119,55 @@ class Utilities:
         return uploaded_file
 
     @staticmethod
-    def setup_chatbot(uploaded_file, llm, redis_url, index_name, schema):
+    def show_audio():
+        with st.sidebar:
+            with st.spinner("Calling AWS Transcribe API..."):
+                st.write("Record Your Voice")
+                audio = mic_recorder(start_prompt="⏺️",
+                                     stop_prompt="⏹️",
+                                     key='recorder',
+                                     format="wav",
+                                     use_container_width=True)
+
+                transcript = ""
+                if audio and audio['bytes']:
+                    st.audio(audio['bytes'], format='audio/wav')
+
+                    with tempfile.NamedTemporaryFile(delete=True,
+                                                     suffix=".wav") as tmpfile:
+                        tmpfile.write(audio['bytes'])
+                        try:
+                            if os.path.exists(tmpfile.name):
+                                print(f"saved {tmpfile.name}.")
+                                # Now, use the temporary file path for transcription
+                                loop = asyncio.get_event_loop()
+                                # transcript = loop.run_until_complete(
+                                #     basic_transcribe("/home/neoxu/PycharmProjects/chat-doc/test/tmp3bdshpl0.wav"))
+                                transcript = loop.run_until_complete(
+                                    basic_transcribe(tmpfile.name))
+                                print("receive transcript:" + transcript)
+                            else:
+                                print(f"cannot find {tmpfile.name}.")
+                        finally:
+                            loop.close()
+                            tmpfile.close()
+                            audio.clear()
+        return transcript
+
+    @staticmethod
+    def setup_chatbot(file_path, llm, redis_url, index_name, schema):
         """
         Sets up the chatbot with the uploaded file, model, and temperature
         """
         embeds = DocEmbedding()
         with st.spinner("Processing..."):
-            uploaded_file.seek(0)
-            file = uploaded_file.read()
+            # with open(filePath, 'rb') as file:
+            # file_content = file.read()
 
-            embeds.create_doc_embedding(file, redis_url, index_name)
+            embeds.create_doc_embedding(file_path, redis_url, index_name)
 
             retriever = embeds.get_doc_retriever(redis_url, index_name, schema)
             chatbot = Chatbot(retriever, llm)
             print(f"new chatbot is created with {index_name} {schema}.")
-        st.session_state["ready"] = True
+            st.session_state["ready"] = True
         return chatbot

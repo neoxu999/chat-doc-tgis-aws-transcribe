@@ -2,10 +2,10 @@ streamlit==1.31.1
 streamlit-chat==0.1.1
 streamlit-authenticator==0.2.3
 streamlit-pydantic==0.6.0
-langchain==0.1.9
-langchain-community==0.0.24
+langchain==0.1.12
+langchain-community==0.0.28
 pypdf==3.17.1
-tiktoken==0.5.2
+tiktoken==0.6.0
 sentence-transformers==2.2.2
 # pydantic==2.5.1
 # pydantic-core==2.14.3
@@ -17,6 +17,7 @@ snowflake-id==0.0.5
 caikit-nlp-client==0.0.8
 amazon-transcribe==0.6.2
 streamlit-mic-recorder==0.0.8
-
+aiofile==3.8.8
+text-generation==0.7.0
 
 

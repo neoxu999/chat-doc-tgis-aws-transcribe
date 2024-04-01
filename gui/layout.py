@@ -34,7 +34,7 @@ class Layout:
             unsafe_allow_html=True,
         )
 
-    def prompt_form(self,rows):
+    def prompt_form(self, transcript):
         """
         Displays the prompt form
         """
@@ -43,6 +43,7 @@ class Layout:
                 "Query:",
                 placeholder="Ask me anything about the PDF...",
                 key="input",
+                value=transcript,
                 label_visibility="collapsed",
             )
             submit_button = st.form_submit_button(label="Send")

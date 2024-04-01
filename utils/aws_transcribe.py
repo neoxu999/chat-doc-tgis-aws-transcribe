@@ -1,9 +1,6 @@
 import asyncio
-
-# This example uses aiofile for asynchronous file reads.
-# It's not a dependency of the project but can be installed
-# with `pip install aiofile`.
 import aiofile
+import tempfile
 
 from amazon_transcribe.client import TranscribeStreamingClient
 from amazon_transcribe.handlers import TranscriptResultStreamHandler
@@ -16,28 +13,42 @@ process the returned transcription results as needed. This
 handler will simply print the text out to your interpreter.
 """
 
-
-SAMPLE_RATE = 16000
+SAMPLE_RATE = 32000
 BYTES_PER_SAMPLE = 2
 CHANNEL_NUMS = 1
 
 # An example file can be found at tests/integration/assets/test.wav
-AUDIO_PATH = "tests/integration/assets/test.wav"
+AUDIO_PATH = "/home/neoxu/PycharmProjects/chat-doc/test/preamble10.wav"
 CHUNK_SIZE = 1024 * 8
-REGION = "us-west-2"
+REGION = "ap-southeast-2"
 
 
 class MyEventHandler(TranscriptResultStreamHandler):
+
+    def __init__(self, transcript_result_stream):
+        super().__init__(transcript_result_stream)
+        self.full_transcript = []  # Initialize a list to hold parts of the tr
+
     async def handle_transcript_event(self, transcript_event: TranscriptEvent):
         # This handler can be implemented to handle transcriptions as needed.
         # Here's an example to get started.
         results = transcript_event.transcript.results
         for result in results:
+            if result.is_partial:
+                continue  # Skip partial results
             for alt in result.alternatives:
-                print(alt.transcript)
+                self.full_transcript.append(alt.transcript)
+
+    async def handle_events(self):
+        await super().handle_events()
+        # Once all events are handled (i.e., the transcription is complete),
+        # print the full transcript as a single string.
+        full_transcript = ' '.join(self.full_transcript).strip()
+        print("Finished:" + full_transcript)
+        return full_transcript
 
 
-async def basic_transcribe():
+async def basic_transcribe(audio_path):
     # Setup up our client with our chosen AWS region
     client = TranscribeStreamingClient(region=REGION)
 
@@ -48,11 +59,11 @@ async def basic_transcribe():
         media_encoding="pcm",
     )
 
-    async def write_chunks():
+    async def write_chunks(audio_path):
         # NOTE: For pre-recorded files longer than 5 minutes, the sent audio
         # chunks should be rate limited to match the realtime bitrate of the
         # audio stream to avoid signing issues.
-        async with aiofile.AIOFile(AUDIO_PATH, "rb") as afp:
+        async with aiofile.AIOFile(audio_path, "rb") as afp:
             reader = aiofile.Reader(afp, chunk_size=CHUNK_SIZE)
             await apply_realtime_delay(
                 stream, reader, BYTES_PER_SAMPLE, SAMPLE_RATE, CHANNEL_NUMS
@@ -61,9 +72,11 @@ async def basic_transcribe():
 
     # Instantiate our handler and start processing events
     handler = MyEventHandler(stream.output_stream)
-    await asyncio.gather(write_chunks(), handler.handle_events())
+    full_transcript = await asyncio.gather(write_chunks(audio_path), handler.handle_events())
+    return full_transcript[1]  # Return the full transcript
 
 
-loop = asyncio.get_event_loop()
-loop.run_until_complete(basic_transcribe())
-loop.close()
+# loop = asyncio.get_event_loop()
+# transcript = loop.run_until_complete(basic_transcribe(AUDIO_PATH))
+# print("Get the transcript:" + transcript)
+# loop.close()

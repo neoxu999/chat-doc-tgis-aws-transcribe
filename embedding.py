@@ -13,17 +13,17 @@ class DocEmbedding:
         self.embeddings = HuggingFaceEmbeddings()
         self.text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
 
-    def create_doc_embedding(self, file, redis_url, index_name) -> None:
+    def create_doc_embedding(self, file_path, redis_url, index_name) -> None:
         """
         Stores document embeddings using Langchain and FAISS
         """
         # Create a temporary file and write the PDF data to it
-        with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp_file:
-            tmp_file.write(file)
-            tmp_file_path = tmp_file.name
+        # with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp_file:
+        #     tmp_file.write(file)
+        #     tmp_file_path = tmp_file.name
 
         # Now you can use the file path with PyPDFium2Loader
-        loader = PyPDFium2Loader(tmp_file_path)
+        loader = PyPDFium2Loader(file_path)
         documents = loader.load()
 
         all_splits = self.text_splitter.split_documents(documents)
@@ -36,7 +36,7 @@ class DocEmbedding:
                                    index_name=index_name)
         rds.write_schema("redis_schema.yaml")
         print(f"Stored document to index: {rds.index_name}")
-        os.remove(tmp_file_path)
+        # os.remove(file_path)
 
     def get_doc_retriever(self, redis_url, index_name, schema):
         """
