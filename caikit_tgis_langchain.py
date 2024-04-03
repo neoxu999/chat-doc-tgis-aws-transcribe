@@ -30,7 +30,7 @@ class CaikitLLM(LLM):
             chain = None
 
         if inference_server_url.startswith("http"):
-            if protocol == "http":
+            if protocol == "http" or (certificate_chain is None):
                 client = HttpClient(inference_server_url, verify=False)
             else:
                 client = HttpClient(inference_server_url, ca_cert_path=certificate_chain)

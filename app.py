@@ -1,14 +1,13 @@
 import os
 
 import streamlit as st
-from langchain_community.llms.huggingface_text_gen_inference import HuggingFaceTextGenInference
+# from langchain_community.llms.huggingface_text_gen_inference import HuggingFaceTextGenInference
 
 import caikit_tgis_langchain
 from gui.history import ChatHistory
 from gui.layout import Layout
 from gui.sidebar import Sidebar, Utilities
 from snowflake import SnowflakeGenerator
-from streamlit_mic_recorder import mic_recorder
 from pathlib import Path
 
 username = os.environ.get("REDIS_USERNAME", "default")
@@ -22,7 +21,7 @@ sources_file = os.environ.get("SOURCE_FILE", "/app/chat-doc-tgis-aws-transcribe/
 
 inference_server_url = os.environ.get('INFERENCE_SERVER_URL',
                                       'https://llm-2-llm.apps.rosa-csfpc.p9o9.p1.openshiftapps.com')
-model_id = os.environ.get("MODEL_ID", "llm-2")
+model_id = os.environ.get("MODEL_ID", "Llama-2-7b-chat-hf-sharded-bf16")
 
 if __name__ == '__main__':
     state = st.session_state
@@ -44,12 +43,12 @@ if __name__ == '__main__':
         sidebar.show_login(login_config)
         # pdf = utils.handle_upload()
 
+        transcript = utils.show_audio()
         if sources_file is None or (not os.path.exists(sources_file)):
             sources_file = "sources/guideline.pdf"
 
         pdf = sources_file
         pdf_name = Path(pdf).name
-        transcript = utils.show_audio()
 
         if pdf:
             sidebar.show_options()
