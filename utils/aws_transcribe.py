@@ -1,7 +1,10 @@
 import asyncio
+import os
+
 import aiofile
 import tempfile
 
+from amazon_transcribe.auth import StaticCredentialResolver
 from amazon_transcribe.client import TranscribeStreamingClient
 from amazon_transcribe.handlers import TranscriptResultStreamHandler
 from amazon_transcribe.model import TranscriptEvent
@@ -21,6 +24,8 @@ CHANNEL_NUMS = 1
 AUDIO_PATH = "/home/neoxu/PycharmProjects/chat-doc/test/preamble10.wav"
 CHUNK_SIZE = 1024 * 8
 REGION = "ap-southeast-2"
+AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
+AWS_ACCESS_KEY = os.environ.get("AWS_ACCESS_KEY")
 
 
 class MyEventHandler(TranscriptResultStreamHandler):
@@ -50,7 +55,12 @@ class MyEventHandler(TranscriptResultStreamHandler):
 
 async def basic_transcribe(audio_path):
     # Setup up our client with our chosen AWS region
-    client = TranscribeStreamingClient(region=REGION)
+    static_credential_resolver = StaticCredentialResolver(
+        access_key_id=AWS_ACCESS_KEY_ID,
+        secret_access_key=AWS_ACCESS_KEY,
+    )
+
+    client = TranscribeStreamingClient(region=REGION, credential_resolver=static_credential_resolver)
 
     # Start transcription to generate our async stream
     stream = await client.start_stream_transcription(

@@ -18,10 +18,11 @@ file_name = os.environ.get("DOCUMENT_NAME", "")
 redis_url = f"redis://{username}:{password}@{host}:6379"
 certificate_chain = os.environ.get("CERTIFICATE_CHAIN_FILE", "/app/rag-ssl.pem")
 protocol = os.environ.get("PROTOCOL", "http")
+sources_file = os.environ.get("SOURCE_FILE", "/app/chat-doc-tgis-aws-transcribe/sources/guideline.pdf")
 
-inference_server_url=os.environ.get('INFERENCE_SERVER_URL',
-  'https://llm-modelserver-llm.apps.rosa-ltrwt.2rfo.p1.openshiftapps.com')
-model_id = os.environ.get("MODEL_ID", "Llama-2-7b-chat-hf-sharded-bf16-fine-tuned")
+inference_server_url = os.environ.get('INFERENCE_SERVER_URL',
+                                      'https://llm-2-llm.apps.rosa-csfpc.p9o9.p1.openshiftapps.com')
+model_id = os.environ.get("MODEL_ID", "llm-2")
 
 if __name__ == '__main__':
     state = st.session_state
@@ -43,7 +44,10 @@ if __name__ == '__main__':
         sidebar.show_login(login_config)
         # pdf = utils.handle_upload()
 
-        pdf = "/home/neoxu/PycharmProjects/chat-doc-tgis-aws-transcribe/sources/guideline-1-3.pdf"
+        if sources_file is None or (not os.path.exists(sources_file)):
+            sources_file = "sources/guideline.pdf"
+
+        pdf = sources_file
         pdf_name = Path(pdf).name
         transcript = utils.show_audio()
 
@@ -52,23 +56,23 @@ if __name__ == '__main__':
 
             try:
                 if 'chatbot' not in st.session_state:
-                    # llm = caikit_tgis_langchain.CaikitLLM(
-                    #     inference_server_url=inference_server_url,
-                    #     model_id=model_id,
-                    #     certificate_chain=certificate_chain,
-                    #     streaming=False
-                    # )
-                    llm = HuggingFaceTextGenInference(
-                        inference_server_url=os.environ.get('INFERENCE_SERVER_URL'),
-                        max_new_tokens=int(os.environ.get('MAX_NEW_TOKENS', '512')),
-                        top_k=int(os.environ.get('TOP_K', '10')),
-                        top_p=float(os.environ.get('TOP_P', '0.95')),
-                        typical_p=float(os.environ.get('TYPICAL_P', '0.95')),
-                        temperature=float(os.environ.get('TEMPERATURE', '0.9')),
-                        repetition_penalty=float(os.environ.get('REPETITION_PENALTY', '1.01')),
-                        streaming=False,
-                        verbose=False
+                    llm = caikit_tgis_langchain.CaikitLLM(
+                        inference_server_url=inference_server_url,
+                        model_id=model_id,
+                        certificate_chain=certificate_chain,
+                        streaming=False
                     )
+                    # llm = HuggingFaceTextGenInference(
+                    #     inference_server_url=os.environ.get('INFERENCE_SERVER_URL'),
+                    #     max_new_tokens=int(os.environ.get('MAX_NEW_TOKENS', '512')),
+                    #     top_k=int(os.environ.get('TOP_K', '10')),
+                    #     top_p=float(os.environ.get('TOP_P', '0.95')),
+                    #     typical_p=float(os.environ.get('TYPICAL_P', '0.95')),
+                    #     temperature=float(os.environ.get('TEMPERATURE', '0.9')),
+                    #     repetition_penalty=float(os.environ.get('REPETITION_PENALTY', '1.01')),
+                    #     streaming=False,
+                    #     verbose=False
+                    # )
 
                     indexGenerator = SnowflakeGenerator(42)
                     index_name = str(next(indexGenerator))
