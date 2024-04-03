@@ -23,9 +23,9 @@ CHANNEL_NUMS = 1
 # An example file can be found at tests/integration/assets/test.wav
 AUDIO_PATH = "/home/neoxu/PycharmProjects/chat-doc/test/preamble10.wav"
 CHUNK_SIZE = 1024 * 8
-REGION = "ap-southeast-2"
+REGION = os.environ.get("AWS_REGION", "ap-southeast-2")
 AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
-AWS_ACCESS_KEY = os.environ.get("AWS_ACCESS_KEY")
+AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
 
 
 class MyEventHandler(TranscriptResultStreamHandler):
@@ -57,7 +57,7 @@ async def basic_transcribe(audio_path):
     # Setup up our client with our chosen AWS region
     static_credential_resolver = StaticCredentialResolver(
         access_key_id=AWS_ACCESS_KEY_ID,
-        secret_access_key=AWS_ACCESS_KEY,
+        secret_access_key=AWS_SECRET_ACCESS_KEY
     )
 
     client = TranscribeStreamingClient(region=REGION, credential_resolver=static_credential_resolver)
