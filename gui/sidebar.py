@@ -136,6 +136,7 @@ class Utilities:
                     with tempfile.NamedTemporaryFile(delete=True,
                                                      suffix=".wav") as tmpfile:
                         tmpfile.write(audio['bytes'])
+                        loop = None
                         try:
                             if os.path.exists(tmpfile.name):
                                 print(f"saved {tmpfile.name}.")
@@ -148,8 +149,12 @@ class Utilities:
                                 print("receive transcript:" + transcript)
                             else:
                                 print(f"cannot find {tmpfile.name}.")
+                        except Exception as e:
+                            # Handle any exceptions that might occur during transcription
+                            print(f"An error occurred during transcription: {e}")
                         finally:
-                            loop.close()
+                            if loop:
+                                loop.close()
                             tmpfile.close()
                             audio.clear()
         return transcript

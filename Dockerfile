@@ -1,6 +1,12 @@
 # Python 3.11 runtime as a parent image
 FROM python:3.11-slim
 
+
+# Install Vim
+RUN apt-get update && \
+    apt-get install -y vim && \
+    rm -rf /var/lib/apt/lists/*
+
 # working directory in the container
 WORKDIR /app
 
