@@ -29,6 +29,12 @@ if __name__ == '__main__':
         state.text_received = []
     if 'has_audio' not in state:
         state['load_audio'] = True
+    if 'last_tts_id' not in st.session_state:
+        st.session_state['last_tts_id'] = 0
+    if 'transcript' not in st.session_state:
+        st.session_state['transcript'] = ""
+    if 'new_output' not in st.session_state:
+        st.session_state['new_output'] = False
 
     st.set_page_config(layout="wide", page_icon="💬", page_title="ChatPDF")
     layout, sidebar, utils = Layout(), Sidebar(), Utilities()
@@ -94,8 +100,9 @@ if __name__ == '__main__':
                         if is_ready:
                             with st.spinner("Processing query..."):
                                 output = st.session_state["chatbot"].conversational_chat(user_input)
-
                     history.generate_messages(response_container)
+                    # # reset transcript
+                    # st.session_state['transcript'] = ""
 
             except Exception as e:
                 st.error(f"{e}")

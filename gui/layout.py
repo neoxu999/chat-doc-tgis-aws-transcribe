@@ -39,15 +39,22 @@ class Layout:
         Displays the prompt form
         """
         with st.form(key="my_form", clear_on_submit=True):
-            user_input = st.text_area(
-                "Query:",
-                placeholder="Ask me anything about the PDF...",
-                key="input",
-                value=transcript,
-                label_visibility="collapsed",
-            )
+            if transcript and st.session_state['new_output']:
+                user_input = st.text_area(
+                    "Query:",
+                    placeholder="Ask me anything about the PDF...",
+                    key="input",
+                    value=transcript,
+                    label_visibility="collapsed",
+                )
+            else:
+                user_input = st.text_area(
+                    "Query:",
+                    placeholder="Ask me anything about the PDF...",
+                    key="input",
+                    label_visibility="collapsed",
+                )
             submit_button = st.form_submit_button(label="Send")
-
             is_ready = submit_button and user_input
         return is_ready, user_input
 

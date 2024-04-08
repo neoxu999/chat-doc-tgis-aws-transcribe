@@ -121,43 +121,47 @@ class Utilities:
     @staticmethod
     def show_audio():
         with st.sidebar:
-            with st.spinner("Calling AWS Transcribe API..."):
-                st.write("Record Your Voice")
-                audio = mic_recorder(start_prompt="⏺️",
-                                     stop_prompt="⏹️",
-                                     key='recorder',
-                                     format="wav",
-                                     use_container_width=True)
+            st.write("Record Your Voice")
+            audio = mic_recorder(start_prompt="⏺️",
+                                 stop_prompt="⏹️",
+                                 key='recorder',
+                                 format="wav",
+                                 use_container_width=True)
 
-                transcript = ""
-                if audio and audio['bytes']:
-                    st.audio(audio['bytes'], format='audio/wav')
-
-                    with tempfile.NamedTemporaryFile(delete=True,
-                                                     suffix=".wav") as tmpfile:
-                        tmpfile.write(audio['bytes'])
-                        loop = None
-                        try:
-                            if os.path.exists(tmpfile.name):
-                                print(f"saved {tmpfile.name}.")
-                                # Now, use the temporary file path for transcription
-                                loop = asyncio.get_event_loop()
-                                # transcript = loop.run_until_complete(
-                                #     basic_transcribe("/home/neoxu/PycharmProjects/chat-doc/test/tmp3bdshpl0.wav"))
-                                transcript = loop.run_until_complete(
-                                    basic_transcribe(tmpfile.name))
-                                print("receive transcript:" + transcript)
-                            else:
-                                print(f"cannot find {tmpfile.name}.")
-                        except Exception as e:
-                            # Handle any exceptions that might occur during transcription
-                            print(f"An error occurred during transcription: {e}")
-                        finally:
-                            if loop:
-                                loop.close()
-                            tmpfile.close()
-                            audio.clear()
-        return transcript
+            new_output = False
+            if audio and audio['bytes']:
+                st.audio(audio['bytes'], format='audio/wav')
+                audio_id = audio['id']
+                new_output = (audio_id > st.session_state['last_tts_id'])
+                if new_output:
+                    st.session_state['last_tts_id'] = audio_id
+                    st.session_state['new_output'] = True
+                    with st.spinner("Calling AWS Transcribe API..."):
+                        with tempfile.NamedTemporaryFile(delete=True,
+                                                         suffix=".wav") as tmpfile:
+                            tmpfile.write(audio['bytes'])
+                            loop = None
+                            try:
+                                if os.path.exists(tmpfile.name):
+                                    print(f"saved {tmpfile.name}.")
+                                    # Now, use the temporary file path for transcription
+                                    loop = asyncio.get_event_loop()
+                                    # transcript = loop.run_until_complete(
+                                    #     basic_transcribe("/home/neoxu/PycharmProjects/chat-doc/test/tmp3bdshpl0.wav"))
+                                    transcript = loop.run_until_complete(
+                                        basic_transcribe(tmpfile.name))
+                                    print("receive transcript:" + transcript)
+                                    st.session_state['transcript'] = transcript
+                                else:
+                                    print(f"cannot find {tmpfile.name}.")
+                            except Exception as e:
+                                # Handle any exceptions that might occur during transcription
+                                print(f"An error occurred during transcription: {e}")
+                            finally:
+                                if loop:
+                                    loop.close()
+                                tmpfile.close()
+        return st.session_state['transcript']
 
     @staticmethod
     def setup_chatbot(file_path, llm, redis_url, index_name, schema):
