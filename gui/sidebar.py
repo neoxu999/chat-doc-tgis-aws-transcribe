@@ -146,8 +146,6 @@ class Utilities:
                                     print(f"saved {tmpfile.name}.")
                                     # Now, use the temporary file path for transcription
                                     loop = asyncio.get_event_loop()
-                                    # transcript = loop.run_until_complete(
-                                    #     basic_transcribe("/home/neoxu/PycharmProjects/chat-doc/test/tmp3bdshpl0.wav"))
                                     transcript = loop.run_until_complete(
                                         basic_transcribe(tmpfile.name))
                                     print("receive transcript:" + transcript)
@@ -161,6 +159,9 @@ class Utilities:
                                 if loop:
                                     loop.close()
                                 tmpfile.close()
+                else:
+                    st.session_state['new_output'] = False
+
         return st.session_state['transcript']
 
     @staticmethod

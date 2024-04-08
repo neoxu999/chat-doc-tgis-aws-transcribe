@@ -47,9 +47,9 @@ if __name__ == '__main__':
         layout.show_loging_details_missing()
     else:
         sidebar.show_login(login_config)
+        transcript = utils.show_audio()
         # pdf = utils.handle_upload()
 
-        transcript = utils.show_audio()
         if sources_file is None or (not os.path.exists(sources_file)):
             sources_file = "sources/guideline.pdf"
 
