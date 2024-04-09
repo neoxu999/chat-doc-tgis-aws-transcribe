@@ -35,6 +35,8 @@ if __name__ == '__main__':
         st.session_state['transcript'] = ""
     if 'new_output' not in st.session_state:
         st.session_state['new_output'] = False
+    if 'current_tts_id' not in st.session_state:
+        st.session_state['current_tts_id'] = 0
 
     st.set_page_config(layout="wide", page_icon="💬", page_title="ChatPDF")
     layout, sidebar, utils = Layout(), Sidebar(), Utilities()
